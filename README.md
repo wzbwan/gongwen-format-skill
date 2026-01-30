@@ -11,22 +11,6 @@
 - 页码：页脚居中 `— 1 —`（Word 字段 `PAGE`）
 - 依赖轻：核心仅依赖 `python-docx`，Front Matter 解析内置实现（不强依赖 PyYAML）
 
-## 目录结构（建议开源仓库内保持一致）
-
-> 典型布局如下（以 Skill 目录为根）：
-
-```
-gongwen-format-skill/
-  SKILL.md
-  scripts/
-    gongwen_doc.py
-  references/
-    受控 Markdown 公文解析与渲染规范（v1.0）.md
-    公文格式要求.md
-  assets/
-    （可选）字体文件 .ttf
-```
-
 ## 安装到 Codex Skills（举例，其他AI Agent类似）
 
 1. 将本仓库中的 `gongwen-format-skill/` 目录复制到你的 Codex Skills 目录下（例如 `~/.codex/skills/`）。
@@ -77,7 +61,7 @@ cat input.md | python scripts/gongwen_doc.py --md - -o 输出公文.docx
 - **不做通用 Markdown**：列表、加粗、表格、引用等语法不解析，尽量不要输出相关符号
 - **编号由你负责写在文本里**：脚本不补全、不校验编号连续性（如“一、”“（一）”“1.”“（1）”）
 
-### Front Matter（可选）
+### Front Matter
 
 文件开头可写 YAML Front Matter（仅支持受控子集）：
 
@@ -124,7 +108,7 @@ attachments:
 这是第二自然段。
 ```
 
-## 字体与合规提示（重要）
+## 字体与合规提示
 
 本项目通常会使用以下字体名进行渲染（由脚本常量控制），以满足常见公文排版习惯：
 
@@ -139,17 +123,3 @@ attachments:
   - 不直接随仓库分发字体文件；或
   - 明确字体来源与授权条款，并在仓库中提供合规的获取方式。
 - 若目标机器未安装对应字体，Word 的显示效果可能会回退到其他字体。
-
-## 设计边界
-
-- 面向“受控输入 + 固定版式”的公文生成；不是通用 Markdown 转 docx 工具
-- 不做语义推断、自动编号、格式纠错与一致性校验
-
-## 贡献与维护建议
-
-- 将输入协议的变更放到 `references/` 并做版本号管理（例如 v1.1、v1.2）
-- 对外开放时建议提供：
-  - `LICENSE`（例如 MIT/Apache-2.0）
-  - `CHANGELOG`（或 Releases 记录）
-  - 最小可复现示例（`examples/`）
-
