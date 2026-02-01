@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -7,7 +8,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Pt
+from docx.shared import Pt, Cm
 
 
 TITLE_FONT = "方正小标宋简体"
@@ -47,10 +48,11 @@ HEADING_STYLE_MAP = {
 }
 
 
-def _set_run_font(run, font_name, size):
+def _set_run_font(run, font_name, size, *, bold=False):
     run.font.name = font_name
     run._element.rPr.rFonts.set(qn("w:eastAsia"), font_name)
     run.font.size = size
+    run.bold = bold
 
 
 def _set_paragraph_format(paragraph, *, first_line_indent=None, left_indent=None):
@@ -65,6 +67,12 @@ def _set_paragraph_format(paragraph, *, first_line_indent=None, left_indent=None
         fmt.left_indent = left_indent
 
 
+def _normalize_quotes(text: str) -> str:
+    if not text:
+        return text
+    return re.sub(r'"([^"\n]+)"', r"“\1”", text)
+
+
 def _add_text_paragraph(document, text, font_name, size, *, align=None,
                         first_line_indent=None, left_indent=None):
     paragraph = document.add_paragraph()
@@ -75,8 +83,8 @@ def _add_text_paragraph(document, text, font_name, size, *, align=None,
         first_line_indent=first_line_indent,
         left_indent=left_indent,
     )
-    run = paragraph.add_run(text)
-    _set_run_font(run, font_name, size)
+    run = paragraph.add_run(_normalize_quotes(text))
+    _set_run_font(run, font_name, size, bold=(font_name == SUBTITLE_FONT))
     return paragraph
 
 
@@ -309,6 +317,11 @@ def build_document(data, output_path: Path):
         body = []
 
     document = Document()
+    section = document.sections[0]
+    section.top_margin = Cm(3.7)
+    section.bottom_margin = Cm(3.5)
+    section.left_margin = Cm(2.5)
+    section.right_margin = Cm(2.5)
 
     if isinstance(blocks, list) and blocks:
         title_rendered = False
@@ -394,6 +407,7 @@ def build_document(data, output_path: Path):
                     text,
                     BODY_FONT,
                     BODY_SIZE,
+                    align=WD_ALIGN_PARAGRAPH.JUSTIFY,
                     first_line_indent=TWO_CHAR_INDENT,
                 )
 
@@ -424,6 +438,11 @@ def build_document(data, output_path: Path):
                 paragraph_text,
                 font_name,
                 BODY_SIZE,
+                align=(
+                    WD_ALIGN_PARAGRAPH.JUSTIFY
+                    if font_name == BODY_FONT
+                    else WD_ALIGN_PARAGRAPH.LEFT
+                ),
                 first_line_indent=TWO_CHAR_INDENT,
             )
 

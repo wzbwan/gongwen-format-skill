@@ -23,6 +23,7 @@ python scripts/gongwen_doc.py --md input.md -o 输出公文.docx
 - Read `references/受控 Markdown 公文解析与渲染规范（v1.0）.md` before generating Markdown input.
 - Read `references/公文格式要求.md` for font sizes, line spacing, and layout constraints.
 - Front matter supports: `recipients`, `signer`, `date`, `attachments`.
+- ASCII double quotes in content are normalized to Chinese quotes (“…”).
 
 Example (controlled Markdown):
 
